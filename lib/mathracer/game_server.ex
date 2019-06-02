@@ -39,6 +39,25 @@ defmodule MathRacer.GameServer do
     GenServer.call(__MODULE__, {:add, player})
   end
 
+  def remove_player(player) do
+    GenServer.call(__MODULE__, {:remove, player})
+  end
+
+  def handle_call({:remove, %Player{id: player_id}}, _from, %GameState{players: players} = state) do
+    players
+    |> Enum.find(fn %Player{id: id} ->
+      player_id == id
+    end)
+    |> case do
+      nil ->
+        {:reply, {:ok, %{players: players}}, state}
+
+      player ->
+        new_players_list = List.delete(players, player)
+        {:ok, {:ok, %{players: new_players_list}, %{state | players: new_players_list}}}
+    end
+  end
+
   def handle_call({:add, player}, _from, %GameState{players: players} = state) do
     case length(players) do
       len when len < 10 ->

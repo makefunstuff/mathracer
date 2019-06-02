@@ -26,4 +26,10 @@ defmodule MathRacer.GameServerTest do
 
     assert {:error, :game_full_error} = GameServer.add_player(player)
   end
+
+  test "it can remove player when player left the game" do
+    player = Player.new()
+
+    assert {:ok, %{players: []}} = GameServer.remove_player(player)
+  end
 end
