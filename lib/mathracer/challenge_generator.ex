@@ -30,7 +30,9 @@ defmodule Mathracer.ChallengeGenerator do
           error: error
         } = challenge
       ) do
-    %{challenge | answer: apply(Kernel, operator, operands) - error}
+    result = apply(Kernel, operator, operands) |> Kernel.trunc()
+
+    %{challenge | answer: result - error}
   end
 
   defp get_operand do
