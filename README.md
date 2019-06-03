@@ -4,6 +4,8 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/makefunstuff/mathracer/badge.svg?branch=master)](https://coveralls.io/github/makefunstuff/mathracer?branch=master)
 
+[Demo](https://racemath.herokuapp.com/)
+
 The game is structured as a continuous series of rounds, where all connected players compete to submit the correct answer first. 
 
 Number of rounds is not limited, players can connect at any time and start competing. - limit number of socket connections
