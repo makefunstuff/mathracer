@@ -1,5 +1,7 @@
 # Mathracer - simple multiplayer math challenge game game
 
+[![CircleCI](https://circleci.com/gh/makefunstuff/mathracer.svg?style=svg)](https://circleci.com/gh/makefunstuff/mathracer)
+
 The game is structured as a continuous series of rounds, where all connected players compete to submit the correct answer first. 
 
 Number of rounds is not limited, players can connect at any time and start competing. - limit number of socket connections
