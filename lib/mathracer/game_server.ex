@@ -58,7 +58,7 @@ defmodule Mathracer.GameServer do
   end
 
   def handle_call(
-        {:check_challenge, %Player{id: player_id} = player, is_correct},
+        {:check_challenge, %Player{id: player_id} = _player, is_correct},
         _from,
         %GameState{
           players: players,
