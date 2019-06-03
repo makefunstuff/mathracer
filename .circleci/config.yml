@@ -6,6 +6,7 @@ jobs:
       - image: circleci/elixir:1.7.3
         environment:
           MIX_ENV: test
+          COVERALLS_REPO_TOKEN: wMr0YTltw8m4vpJliPiXRbCsMrJhGZrJk
 
     working_directory: ~/app
 
@@ -41,7 +42,7 @@ jobs:
           key: v1-build-cache
           paths: "_build"
 
-      - run: mix test
+      - run: mix coveralls.circle
 
       - store_test_results:
           path: _build/test/lib/mathracer
