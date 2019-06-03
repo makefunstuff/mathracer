@@ -1,0 +1,53 @@
+<div class="container">
+  <div class="row">
+    <div class="col-md-8">
+      <%= if @game_state == :INTRO do %>
+        <div id="intro" class="jumbotron">
+          <h1 class="display-4">Welcome to the Math Racing</h1>
+          <p class="lead">This is a simple math game that will test your skills in arithmetic callculations.</p>
+          <hr class="my-4">
+          <p>You will see math challenge and you should respond is answer is truthy or not</p>
+          <a phx-click="join_game" class="btn btn-primary btn-lg" href="#" role="button">Join Game</a>
+        </div>
+      <% end %>
+
+      <%= if @game_state == :NEW_ROUND do %>
+        <div id="game" class="jumbotron">
+          <h1 class="display-4">New round will start in <%= @countdown %></h1>
+        </div>
+      <% end %>
+
+      <%= if @game_state == :STARTED do %>
+        <div id="game" class="jumbotron">
+          <h1 class="display-4"><%= @challenge %></h1>
+          <h2>Score: <%= @player.score %></h2>
+          <a phx-click="challenge_correct" class="btn btn-success btn-lg" href="#" role="button">Yes</a>
+          <a phx-click="challenge_wrong" class="btn btn-danger btn-lg" href="#" role="button">No</a>
+        </div>
+      <% end %>
+    </div>
+  
+    <%= if @game_state in [:NEW_ROUND, :STARTED] do %>
+      <div class="col-md-4">
+        <div class="card" style="width: 18rem;">
+          <div class="card-header">
+            Leaderboard
+          </div>
+          <ul class="list-group">
+            <%= for player <- @players do %>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <%= player.id %>
+                  <%= if player.id == @player.id do %>
+                    <b>you</b>
+                  <% end %>  
+                  
+                <span class="badge badge-primary badge-pill"><%= player.score %></span>
+              </li>
+            <% end %>
+            </ul>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+

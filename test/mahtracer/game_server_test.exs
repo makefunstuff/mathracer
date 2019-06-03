@@ -43,7 +43,7 @@ defmodule Mathracer.GameServerTest do
 
     result = ChallengeGenerator.has_correct_answer?(challenge)
 
-    assert {:ok, %Player{score: 1}} = GameServer.check_challenge(player, result)
+    assert {:ok, {:hit, %Player{score: 1}}} = GameServer.check_challenge(player, result)
   end
 
   test "it cannot increment player score when player not found" do
@@ -65,8 +65,8 @@ defmodule Mathracer.GameServerTest do
 
     result = ChallengeGenerator.has_correct_answer?(challenge)
 
-    assert {:ok, %Player{score: 1}} = GameServer.check_challenge(player, result)
-    assert {:ok, %Player{score: 0}} = GameServer.check_challenge(second_player, result)
+    assert {:ok, {:hit, %Player{score: 1}}} = GameServer.check_challenge(player, result)
+    assert {:ok, {:late, %Player{score: 0}}} = GameServer.check_challenge(second_player, result)
   end
 
   test "it will decrement player score when challenge has been incorrect" do
@@ -77,6 +77,6 @@ defmodule Mathracer.GameServerTest do
 
     result = ChallengeGenerator.has_correct_answer?(challenge)
 
-    assert {:ok, %Player{score: -1}} = GameServer.check_challenge(player, !result)
+    assert {:ok, {:miss, %Player{score: -1}}} = GameServer.check_challenge(player, !result)
   end
 end

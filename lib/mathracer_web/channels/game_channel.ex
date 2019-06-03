@@ -2,14 +2,16 @@ defmodule MathracerWeb.GameChannel do
   use MathracerWeb, :channel
 
   alias Mathracer.GameServer
+  alias GameServer.GameState
 
   require Logger
 
   def join("game:round", _payload, socket = %{assigns: %{player: player}}) do
     case GameServer.add_player(player) do
       {:ok, _player} ->
-        Logger.info("Player has been joined")
-        {:ok, socket}
+        %GameState{challenge: challenge} = :sys.get_state(GameServer)
+
+        {:ok, %{challenge: to_string(challenge), id: player.id, score: player.score}, socket}
 
       {:error, :game_full_error} ->
         {:error, "No free spots"}

@@ -12,6 +12,10 @@ config :mathracer, MathracerWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "vNB5zHV1HukPQlVU06XMx7mo64/q6Mh1WJ/E8UhaTrDFEYfdQQvXKIKOTglBrRpg",
   render_errors: [view: MathracerWeb.ErrorView, accepts: ~w(html json)],
+  pubsub: [name: Mathracer.PubSub, adapter: Phoenix.PubSub.PG2],
+  live_view: [
+    signing_salt: "s3cr3t"
+  ],
   pubsub: [name: Mathracer.PubSub, adapter: Phoenix.PubSub.PG2]
 
 # Configures Elixir's Logger
@@ -21,6 +25,9 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+config :phoenix,
+  template_engines: [leex: Phoenix.LiveView.Engine]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

@@ -52,6 +52,7 @@ config :mathracer, MathracerWeb.Endpoint,
       ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
       ~r{priv/gettext/.*(po)$},
       ~r{lib/mathracer_web/views/.*(ex)$},
+      ~r{lib/my_app_web/live/.*(ex)$},
       ~r{lib/mathracer_web/templates/.*(eex)$}
     ]
   ]

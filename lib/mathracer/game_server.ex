@@ -54,7 +54,9 @@ defmodule Mathracer.GameServer do
 
   def handle_call(:new_challenge, _from, state) do
     new_challenge = ChallengeGenerator.new()
-    {:reply, {:ok, new_challenge}, %{state | challenge: new_challenge}}
+
+    {:reply, {:ok, new_challenge},
+     %{state | challenge: new_challenge, is_challenge_solved: false}}
   end
 
   def handle_call(
@@ -70,10 +72,12 @@ defmodule Mathracer.GameServer do
          {:correct_answer, true, player} <-
            {:correct_answer, is_correct == ChallengeGenerator.has_correct_answer?(challenge),
             player} do
-      updated_player = if !solved, do: %{player | score: player.score + 1}, else: player
+      {result, updated_player} =
+        if !solved, do: {:hit, %{player | score: player.score + 1}}, else: {:late, player}
+
       new_players_list = List.delete(players, player)
 
-      {:reply, {:ok, updated_player},
+      {:reply, {:ok, {result, updated_player}},
        %{state | players: [updated_player | new_players_list], is_challenge_solved: true}}
     else
       nil ->
@@ -83,7 +87,8 @@ defmodule Mathracer.GameServer do
         new_players_list = List.delete(players, player)
         updated_player = %{player | score: player.score - 1}
 
-        {:reply, {:ok, updated_player}, %{state | players: [updated_player | new_players_list]}}
+        {:reply, {:ok, {:miss, updated_player}},
+         %{state | players: [updated_player | new_players_list]}}
     end
   end
 
