@@ -1,4 +1,4 @@
-defmodule MathRacer.ChallengeGeneratorTest do
+defmodule Mathracer.ChallengeGeneratorTest do
   use ExUnit.Case
 
   alias Mathracer.ChallengeGenerator

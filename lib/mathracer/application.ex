@@ -10,7 +10,7 @@ defmodule Mathracer.Application do
 
     children = [
       MathracerWeb.Endpoint,
-      worker(MathRacer.GameServer, [])
+      worker(Mathracer.GameServer, [])
     ]
 
     opts = [strategy: :one_for_one, name: Mathracer.Supervisor]
