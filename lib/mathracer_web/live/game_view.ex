@@ -14,14 +14,15 @@ defmodule MathracerWeb.GameView do
 
     MathracerWeb.Endpoint.subscribe(@topic)
 
-    %GameState{players: players, challenge: challenge} = :sys.get_state(GameServer)
+    {:ok, %GameState{players: players, challenge: challenge, counter: counter}}
+      = GameServer.get_game_state()
 
     initial_state = %{
       game_state: :INTRO,
       challenge: to_string(challenge),
       players: players,
       player: player,
-      countdown: 5
+      countdown: counter
     }
 
     {:ok, assign(socket, initial_state)}
@@ -31,7 +32,7 @@ defmodule MathracerWeb.GameView do
   def handle_event("join_game", _value, socket) do
     case GameServer.add_player(socket.assigns.player) do
       {:ok, player} ->
-        %GameState{players: players} = state = :sys.get_state(GameServer)
+        {:ok, %GameState{players: players} = state} = GameServer.get_game_state()
         MathracerWeb.Endpoint.broadcast!(@topic, "refresh", state)
         {:noreply, assign(socket, game_state: :STARTED, player: player, players: players)}
 
@@ -41,7 +42,7 @@ defmodule MathracerWeb.GameView do
   end
 
   def handle_event("player_joined", _value, socket) do
-    %GameState{players: players} = :sys.get_state(GameServer)
+    %GameState{players: players} = GameServer.get_game_state()
     {:noreply, assign(socket, players: players)}
   end
 
@@ -67,21 +68,21 @@ defmodule MathracerWeb.GameView do
         socket
       ) do
 
-    {:ok, :timer} = GameServer.restart_game()
+    {:ok, :timer_started} = GameServer.restart_game()
     {:noreply, assign(socket, challenge: new_challenge, players: players, game_state: :NEW_ROUND)}
   end
 
   def handle_info(
         %{
-          event: "timer",
+          event: "timer_end",
           topic: @topic,
-          payload: %{new_counter: 0}
+          payload: %{}
         },
         socket
       ) do
 
-    %GameState{players: players} = :sys.get_state(GameServer)
-    {:noreply, assign(socket, game_state: :STARTED, players: players, countdown: 5)}
+    {:ok, %GameState{players: players, counter: counter}} = GameServer.get_game_state()
+    {:noreply, assign(socket, game_state: :STARTED, players: players, countdown: counter)}
   end
 
   def handle_info(
@@ -98,7 +99,7 @@ defmodule MathracerWeb.GameView do
   def terminate(_reason, socket) do
     _ = GameServer.remove_player(socket.assigns.player)
 
-    %GameState{} = state = :sys.get_state(GameServer)
+    {:ok, %GameState{} = state} = GameServer.get_game_state()
     MathracerWeb.Endpoint.broadcast!(@topic, "refresh", state)
 
     {:noreply, socket}
@@ -110,7 +111,7 @@ defmodule MathracerWeb.GameView do
         {:ok, {:hit, player}} ->
           {:ok, challenge} = GameServer.new_challenge()
 
-          %GameState{players: players} = :sys.get_state(GameServer)
+          {:ok, %GameState{players: players}} = GameServer.get_game_state()
 
           MathracerWeb.Endpoint.broadcast!(@topic, "round_end", %{
             new_challenge: to_string(challenge),
@@ -120,13 +121,13 @@ defmodule MathracerWeb.GameView do
           {to_string(challenge), player}
 
         {:ok, {_result, player}} ->
-          %GameState{} = state = :sys.get_state(GameServer)
+          {:ok, %GameState{} = state} = GameServer.get_game_state()
           MathracerWeb.Endpoint.broadcast!(@topic, "refresh", state)
 
           {socket.assigns.challenge, player}
       end
 
-    %GameState{players: players} = :sys.get_state(GameServer)
+    {:ok, %GameState{players: players}} = GameServer.get_game_state()
 
     {:noreply,
      assign(socket, player: player, players: players, game_state: :STARTED, challenge: challenge)}

@@ -41,6 +41,8 @@ defmodule Mathracer.GameServer do
     {:ok, GameState.new()}
   end
 
+  # Public API
+
   def add_player(player) do
     GenServer.call(__MODULE__, {:add, player})
   end
@@ -61,8 +63,14 @@ defmodule Mathracer.GameServer do
     GenServer.call(__MODULE__, :restart_game)
   end
 
-  def handle_info(:timeout, %{counter: 0} = state) do
-    MathracerWeb.Endpoint.broadcast!(@topic, "timer", %{new_counter: 0})
+  def get_game_state() do
+    GenServer.call(__MODULE__, :get_game_state)
+  end
+
+  # Genserver Handlers
+
+  def handle_info(:timeout, %{counter: 1} = state) do
+    MathracerWeb.Endpoint.broadcast!(@topic, "timer_end", %{})
     {:noreply, %{state | counter: 5}}
   end
 
@@ -74,8 +82,12 @@ defmodule Mathracer.GameServer do
     {:noreply, %{state | counter: new_counter}, @timeout}
   end
 
+  def handle_call(:get_game_state, _from, state) do
+    {:reply, {:ok, state}, state}
+  end
+
   def handle_call(:restart_game, _from, state) do
-    {:reply, {:ok, :timer}, state, @timeout}
+    {:reply, {:ok, :timer_started}, state, @timeout}
   end
 
 
