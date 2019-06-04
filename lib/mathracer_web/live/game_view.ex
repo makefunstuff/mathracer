@@ -67,8 +67,8 @@ defmodule MathracerWeb.GameView do
         socket
       ) do
 
-    timer = Process.send_after(self(), {:tick, socket.assigns.countdown}, :timer.seconds(1))
-    {:noreply, assign(socket, challenge: new_challenge, players: players, game_state: :NEW_ROUND, timer_ref: timer)}
+    {:ok, :timer} = GameServer.restart_game()
+    {:noreply, assign(socket, challenge: new_challenge, players: players, game_state: :NEW_ROUND)}
   end
 
   def handle_info(
@@ -94,24 +94,6 @@ defmodule MathracerWeb.GameView do
       ) do
     {:noreply, assign(socket, countdown: new_counter)}
   end
-
-
-  def handle_info({:tick, 0}, socket = %{assigns: %{timer_ref: timer}}) do
-    :timer.cancel(timer)
-    MathracerWeb.Endpoint.broadcast!(@topic, "timer", %{new_counter: 0})
-    {:noreply, socket}
-  end
-
-  def handle_info({:tick, countdown}, socket = %{assigns: %{timer_ref: timer}}) do
-    new_counter = countdown - 1
-    :timer.cancel(timer)
-
-    new_timer = Process.send_after(self(), {:tick, new_counter}, :timer.seconds(1))
-    MathracerWeb.Endpoint.broadcast!(@topic, "timer", %{new_counter: new_counter, timer_ref: new_timer})
-
-    {:noreply, socket}
-  end
-
 
   def terminate(_reason, socket) do
     _ = GameServer.remove_player(socket.assigns.player)

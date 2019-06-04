@@ -1,4 +1,7 @@
 defmodule Mathracer.GameServer do
+  @topic "game_lobby"
+  @timeout :timer.seconds(1)
+
   alias Mathracer.ChallengeGenerator
 
   alias GameState
@@ -17,13 +20,15 @@ defmodule Mathracer.GameServer do
   end
 
   defmodule GameState do
-    defstruct [:players, :challenge, :is_challenge_solved]
+    defstruct [:players, :challenge, :is_challenge_solved, :timer, :counter]
 
     def new() do
       %__MODULE__{
         players: [],
         challenge: ChallengeGenerator.new(),
-        is_challenge_solved: false
+        is_challenge_solved: false,
+        timer: nil,
+        counter: 5
       }
     end
   end
@@ -51,6 +56,28 @@ defmodule Mathracer.GameServer do
   def new_challenge() do
     GenServer.call(__MODULE__, :new_challenge)
   end
+
+  def restart_game() do
+    GenServer.call(__MODULE__, :restart_game)
+  end
+
+  def handle_info(:timeout, %{counter: 0} = state) do
+    MathracerWeb.Endpoint.broadcast!(@topic, "timer", %{new_counter: 0})
+    {:noreply, %{state | counter: 5}}
+  end
+
+  def handle_info(:timeout, %{counter: counter} = state) do
+    new_counter = counter - 1
+
+    MathracerWeb.Endpoint.broadcast!(@topic, "timer", %{new_counter: new_counter})
+
+    {:noreply, %{state | counter: new_counter}, @timeout}
+  end
+
+  def handle_call(:restart_game, _from, state) do
+    {:reply, {:ok, :timer}, state, @timeout}
+  end
+
 
   def handle_call(:new_challenge, _from, state) do
     new_challenge = ChallengeGenerator.new()
