@@ -3,6 +3,8 @@ defmodule MathracerWeb.GameView do
   alias Mathracer.GameServer
   alias Mathracer.GameServer.{GameState, Player}
 
+  require Logger
+
   @topic "game_lobby"
 
   def render(assigns) do
@@ -14,8 +16,8 @@ defmodule MathracerWeb.GameView do
 
     MathracerWeb.Endpoint.subscribe(@topic)
 
-    {:ok, %GameState{players: players, challenge: challenge, counter: counter}}
-      = GameServer.get_game_state()
+    {:ok, %GameState{players: players, challenge: challenge, counter: counter}} =
+      GameServer.get_game_state()
 
     initial_state = %{
       game_state: :INTRO,
@@ -67,7 +69,6 @@ defmodule MathracerWeb.GameView do
         },
         socket
       ) do
-
     {:ok, :timer_started} = GameServer.restart_game()
     {:noreply, assign(socket, challenge: new_challenge, players: players, game_state: :NEW_ROUND)}
   end
@@ -80,7 +81,6 @@ defmodule MathracerWeb.GameView do
         },
         socket
       ) do
-
     {:ok, %GameState{players: players, counter: counter}} = GameServer.get_game_state()
     {:noreply, assign(socket, game_state: :STARTED, players: players, countdown: counter)}
   end
@@ -113,6 +113,8 @@ defmodule MathracerWeb.GameView do
 
           {:ok, %GameState{players: players}} = GameServer.get_game_state()
 
+          Logger.info("Correct answer restarting round")
+
           MathracerWeb.Endpoint.broadcast!(@topic, "round_end", %{
             new_challenge: to_string(challenge),
             players: players
@@ -120,9 +122,10 @@ defmodule MathracerWeb.GameView do
 
           {to_string(challenge), player}
 
-        {:ok, {_result, player}} ->
+        {:ok, {result, player}} ->
+          Logger.info("Wrong answer #{inspect(result)}")
           {:ok, %GameState{} = state} = GameServer.get_game_state()
-          MathracerWeb.Endpoint.broadcast!(@topic, "refresh", state)
+          _ = MathracerWeb.Endpoint.broadcast!(@topic, "refresh", state)
 
           {socket.assigns.challenge, player}
       end
